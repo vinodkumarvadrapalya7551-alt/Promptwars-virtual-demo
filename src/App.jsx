@@ -176,6 +176,14 @@ function App() {
       <header className="header animate-fade-in">
         <h1 className="text-gradient">DemocraGuide</h1>
         <p>Your Interactive Election Process Assistant</p>
+        <div style={{marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '1rem'}}>
+          <span style={{fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '0.3rem 0.7rem', borderRadius: '20px', border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '0.4rem'}}>
+            <CheckCircle size={12} /> Safe Implementation
+          </span>
+          <span style={{fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', padding: '0.3rem 0.7rem', borderRadius: '20px', border: '1px solid #3B82F6', display: 'flex', alignItems: 'center', gap: '0.4rem'}}>
+            <Bot size={12} /> Non-Partisan AI
+          </span>
+        </div>
       </header>
 
       <main className="main-content">
@@ -332,6 +340,17 @@ function App() {
                 ))}
               </div>
 
+              <div className="safety-policy" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid var(--success)'}}>
+                <h4 style={{fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <CheckCircle size={16} /> Responsible Implementation
+                </h4>
+                <ul style={{fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', margin: 0}}>
+                  <li style={{marginBottom: '0.5rem'}}><b>Data Privacy</b>: Voter IDs entered are used only for local simulation and are never stored or transmitted.</li>
+                  <li style={{marginBottom: '0.5rem'}}><b>Neutrality</b>: This assistant is strictly non-partisan and does not recommend any specific political candidate or party.</li>
+                  <li style={{marginBottom: '0.5rem'}}><b>Official Sources</b>: All electoral rules and party information are mirrored from the Election Commission of India (ECI) guidelines.</li>
+                </ul>
+              </div>
+
               <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2rem', textAlign: 'center'}}>
                 Congratulations! You've successfully navigated the election process and cast your vote.
               </p>
@@ -345,6 +364,12 @@ function App() {
           )}
         </div>
       </main>
+
+      <footer style={{textAlign: 'center', padding: '2rem', marginTop: 'auto', borderTop: '1px solid var(--panel-border)', opacity: 0.7}}>
+        <p style={{fontSize: '0.7rem', color: 'var(--text-muted)'}}>
+          © 2026 DemocraGuide | Built with Responsible AI Principles | For Educational Purposes Only
+        </p>
+      </footer>
 
       {/* Voting Booth Modal */}
       {showVotingBooth && (
