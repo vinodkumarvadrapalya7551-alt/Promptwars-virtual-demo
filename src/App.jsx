@@ -53,6 +53,14 @@ function App() {
     { id: 'b', name: 'Progress Alliance', color: '#06B6D4' },
     { id: 'c', name: 'Heritage Group', color: '#F43F5E' }
   ];
+
+  const COMMUNITIES = [
+    { name: "Student Community", leading: "Progress Alliance", support: "68%" },
+    { name: "Tech Professionals", leading: "Unity Party", support: "52%" },
+    { name: "Senior Citizens", leading: "Heritage Group", support: "74%" },
+    { name: "Rural Farmers", leading: "Heritage Group", support: "61%" },
+    { name: "Healthcare Workers", leading: "Unity Party", support: "49%" }
+  ];
   
   const messagesEndRef = useRef(null);
 
@@ -246,6 +254,26 @@ function App() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="community-insights" style={{marginTop: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
+                <h4 style={{fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <MapPin size={16} className="text-gradient" />
+                  Community-wise Breakdown
+                </h4>
+                <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '0.8rem'}}>
+                  {COMMUNITIES.map((comm, idx) => (
+                    <div key={idx} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', fontSize: '0.8rem'}}>
+                      <span style={{fontWeight: '500'}}>{comm.name}</span>
+                      <div style={{textAlign: 'right'}}>
+                        <span style={{color: comm.leading === 'Unity Party' ? '#4F46E5' : comm.leading === 'Progress Alliance' ? '#06B6D4' : '#F43F5E', fontWeight: 'bold'}}>
+                          {comm.leading}
+                        </span>
+                        <span style={{color: 'var(--text-muted)', marginLeft: '0.5rem'}}>({comm.support})</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1.5rem', textAlign: 'center'}}>
