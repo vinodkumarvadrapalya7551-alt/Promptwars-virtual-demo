@@ -48,18 +48,29 @@ function App() {
   const [userVote, setUserVote] = useState(null);
   const [showVotingBooth, setShowVotingBooth] = useState(false);
   
-  const CANDIDATES = [
-    { id: 'a', name: 'Unity Party', color: '#4F46E5' },
-    { id: 'b', name: 'Progress Alliance', color: '#06B6D4' },
-    { id: 'c', name: 'Heritage Group', color: '#F43F5E' }
+  const PARTIES = [
+    { id: 'bjp', name: 'Bharatiya Janata Party (BJP)', desc: 'Right-wing, conservative, Hindutva-focused.', color: '#FF9933' },
+    { id: 'inc', name: 'Indian National Congress (INC)', desc: 'Center-left, big tent, secularism.', color: '#19AAED' },
+    { id: 'aap', name: 'Aam Aadmi Party (AAP)', desc: 'Centre-left, anti-corruption, social welfare.', color: '#0072B0' },
+    { id: 'cpm', name: 'Communist Party of India (Marxist) (CPM)', desc: 'Left-wing, communist.', color: '#DE0000' }
   ];
 
-  const COMMUNITIES = [
-    { name: "Student Community", leading: "Progress Alliance", support: "68%" },
-    { name: "Tech Professionals", leading: "Unity Party", support: "52%" },
-    { name: "Senior Citizens", leading: "Heritage Group", support: "74%" },
-    { name: "Rural Farmers", leading: "Heritage Group", support: "61%" },
-    { name: "Healthcare Workers", leading: "Unity Party", support: "49%" }
+  const STATE_PARTIES = [
+    { name: 'All India Trinamool Congress (AITC)', base: 'West Bengal' },
+    { name: 'Dravida Munnetra Kazhagam (DMK)', base: 'Tamil Nadu' },
+    { name: 'Telugu Desam Party (TDP)', base: 'Andhra Pradesh' },
+    { name: 'Samajwadi Party (SP)', base: 'Uttar Pradesh' }
+  ];
+
+  const ALLIANCES = [
+    { name: 'National Democratic Alliance (NDA)', lead: 'BJP', focus: 'Center-right coalition' },
+    { name: 'I.N.D.I.A Alliance', lead: 'INC', focus: 'Opposition coalition of 26+ parties' }
+  ];
+
+  const ELECTORAL_CONTEXT = [
+    { title: "Registration", desc: "All parties must register with the ECI under the Representation of the People Act, 1951." },
+    { title: "Symbols", desc: "Recognized parties are allotted exclusive symbols (e.g., Lotus for BJP, Hand for INC)." },
+    { title: "RUPPs", desc: "Unrecognized parties choose from a free pool of symbols; inactive ones are regularly delisted." }
   ];
   
   const messagesEndRef = useRef(null);
@@ -236,47 +247,60 @@ function App() {
               <div className="poll-results" style={{marginTop: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
                 <h4 style={{fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                   <Search size={16} className="text-gradient" />
-                  Live Polling Standings
+                  National Polling Standings
                 </h4>
-                {CANDIDATES.map(cand => (
+                {PARTIES.map(cand => (
                   <div key={cand.id} style={{marginBottom: '1rem'}}>
                     <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem'}}>
                       <span>{cand.name} {userVote === cand.id && <span style={{color: 'var(--success)', marginLeft: '0.5rem'}}>(Your Vote)</span>}</span>
-                      <span style={{fontWeight: 'bold'}}>{cand.id === 'a' ? '42%' : cand.id === 'b' ? '35%' : '23%'}</span>
+                      <span style={{fontWeight: 'bold'}}>{cand.id === 'bjp' ? '38%' : cand.id === 'inc' ? '28%' : cand.id === 'aap' ? '12%' : '8%'}</span>
                     </div>
                     <div style={{height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden'}}>
                       <div style={{
                         height: '100%', 
-                        width: cand.id === 'a' ? '42%' : cand.id === 'b' ? '35%' : '23%', 
+                        width: cand.id === 'bjp' ? '38%' : cand.id === 'inc' ? '28%' : cand.id === 'aap' ? '12%' : '8%', 
                         background: cand.color,
                         boxShadow: `0 0 10px ${cand.color}80`
                       }}></div>
                     </div>
+                    <p style={{fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem'}}>{cand.desc}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="community-insights" style={{marginTop: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
-                <h4 style={{fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-                  <MapPin size={16} className="text-gradient" />
-                  Community-wise Breakdown
-                </h4>
-                <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '0.8rem'}}>
-                  {COMMUNITIES.map((comm, idx) => (
-                    <div key={idx} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', fontSize: '0.8rem'}}>
-                      <span style={{fontWeight: '500'}}>{comm.name}</span>
-                      <div style={{textAlign: 'right'}}>
-                        <span style={{color: comm.leading === 'Unity Party' ? '#4F46E5' : comm.leading === 'Progress Alliance' ? '#06B6D4' : '#F43F5E', fontWeight: 'bold'}}>
-                          {comm.leading}
-                        </span>
-                        <span style={{color: 'var(--text-muted)', marginLeft: '0.5rem'}}>({comm.support})</span>
-                      </div>
+              <div className="community-insights" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
+                <h4 style={{fontSize: '0.9rem', marginBottom: '1.2rem', color: 'var(--text-main)'}}>Major State Parties</h4>
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem'}}>
+                  {STATE_PARTIES.map((comm, idx) => (
+                    <div key={idx} style={{padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', fontSize: '0.75rem'}}>
+                      <div style={{fontWeight: 'bold', color: 'var(--text-main)'}}>{comm.name.split('(')[0]}</div>
+                      <div style={{color: 'var(--text-muted)', fontSize: '0.7rem'}}>Base: {comm.base}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1.5rem', textAlign: 'center'}}>
+              <div className="alliances-section" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
+                <h4 style={{fontSize: '0.9rem', marginBottom: '1.2rem', color: 'var(--text-main)'}}>Major Alliances</h4>
+                {ALLIANCES.map((all, idx) => (
+                  <div key={idx} style={{marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px'}}>
+                    <div style={{fontWeight: 'bold', color: 'var(--primary)'}}>{all.name}</div>
+                    <div style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem'}}>Lead: {all.lead} | {all.focus}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="context-section" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)', borderLeft: '4px solid var(--primary)'}}>
+                <h4 style={{fontSize: '0.9rem', marginBottom: '1.2rem', color: 'var(--text-main)'}}>Electoral System Context</h4>
+                {ELECTORAL_CONTEXT.map((item, idx) => (
+                  <div key={idx} style={{marginBottom: '0.8rem'}}>
+                    <span style={{fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-main)'}}>{item.title}: </span>
+                    <span style={{fontSize: '0.75rem', color: 'var(--text-muted)'}}>{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2rem', textAlign: 'center'}}>
                 Congratulations! You've successfully navigated the election process and cast your vote.
               </p>
             </div>
@@ -295,7 +319,7 @@ function App() {
             <p className="hurdle-desc">It's time to make your voice heard! Select your candidate from the ballot below.</p>
             
             <div className="hurdle-options" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '1rem'}}>
-              {CANDIDATES.map((cand) => (
+              {PARTIES.map((cand) => (
                 <button 
                   key={cand.id} 
                   className="hurdle-btn"
