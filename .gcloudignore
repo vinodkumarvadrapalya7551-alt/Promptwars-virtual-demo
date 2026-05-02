@@ -1,0 +1,6 @@
+.gcloudignore
+.git
+.gitignore
+node_modules
+# Do NOT ignore dist, we need it for the Docker build
+#!dist
