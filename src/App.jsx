@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, MapPin, Search, Bot, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Send, MapPin, Search, Bot, AlertTriangle, CheckCircle, XCircle, ShieldCheck } from 'lucide-react';
 
 const ELECTION_STEPS = [
   { id: 1, title: "Voter Registration", desc: "Ensure you are on the electoral roll." },
@@ -36,6 +36,14 @@ const HURDLES = {
       { text: "Argue with the polling officer.", correct: false, feedback: "Arguing won't help. Officers follow the provided lists." },
       { text: "Ask for the Booth Level Officer (BLO) or check the electoral search online.", correct: true, feedback: "Yes! The BLO can help resolve list discrepancies." }
     ]
+  },
+  4: {
+    title: "Identity Verification",
+    desc: "The officer asks for your identity proof. You realize you brought your Aadhaar card instead of your Voter ID. Can you still vote?",
+    options: [
+      { text: "No, only Voter ID is accepted.", correct: false, feedback: "Actually, several other documents are also accepted!" },
+      { text: "Yes, Aadhaar and several other IDs are valid for voting.", correct: true, feedback: "Correct! The Election Commission accepts 12 alternative documents including Aadhaar, PAN, and Driving License." }
+    ]
   }
 };
 
@@ -52,6 +60,7 @@ function App() {
   
   const [PARTIES, setParties] = useState([]);
   const [ALLIANCES, setAlliances] = useState([]);
+  const [votes, setVotes] = useState({});
 
   useEffect(() => {
     fetch('/api/init')
@@ -59,6 +68,7 @@ function App() {
       .then(data => {
         setParties(data.parties);
         setAlliances(data.alliances);
+        setVotes(data.votes);
       })
       .catch(err => console.error("Failed to connect to backend:", err));
   }, []);
@@ -138,6 +148,30 @@ function App() {
     }, 1000);
   };
 
+  const handleVote = (partyId) => {
+    fetch('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partyId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setVotes(data.votes);
+          setUserVote(partyId);
+          setShowVotingBooth(false);
+          setCurrentStep(4);
+          const party = PARTIES.find(p => p.id === partyId);
+          setMessages(prev => [...prev, { 
+            id: Date.now(), 
+            sender: 'bot', 
+            text: `Your vote for ${party?.name || 'your chosen party'} has been cast! Let's watch the results come in.` 
+          }]);
+        }
+      })
+      .catch(err => console.error("Voting failed:", err));
+  };
+
   const handleHurdleChoice = (option) => {
     setHurdleFeedback({ isCorrect: option.correct, message: option.feedback });
     
@@ -154,7 +188,14 @@ function App() {
         
         if (currentStep < 4) {
           setTimeout(() => {
-            if (currentStep === 3) {
+            if (activeHurdle.title === HURDLES[3].title) {
+              setActiveHurdle(HURDLES[4]);
+              setMessages(prev => [...prev, { 
+                id: Date.now() + 1, 
+                sender: 'bot', 
+                text: "One last check before you enter the booth: identity verification." 
+              }]);
+            } else if (activeHurdle.title === HURDLES[4].title) {
               setShowVotingBooth(true);
             } else {
               setCurrentStep(prev => prev + 1);
@@ -300,23 +341,30 @@ function App() {
                   <Search size={16} className="text-gradient" />
                   National Polling Standings
                 </h4>
-                {PARTIES.map(cand => (
-                  <div key={cand.id} style={{marginBottom: '1rem'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem'}}>
-                      <span>{cand.name} {userVote === cand.id && <span style={{color: 'var(--success)', marginLeft: '0.5rem'}}>(Your Vote)</span>}</span>
-                      <span style={{fontWeight: 'bold'}}>{cand.id === 'bjp' ? '38%' : cand.id === 'inc' ? '28%' : cand.id === 'aap' ? '12%' : '8%'}</span>
-                    </div>
-                    <div style={{height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden'}}>
-                      <div style={{
-                        height: '100%', 
-                        width: cand.id === 'bjp' ? '38%' : cand.id === 'inc' ? '28%' : cand.id === 'aap' ? '12%' : '8%', 
-                        background: cand.color,
-                        boxShadow: `0 0 10px ${cand.color}80`
-                      }}></div>
-                    </div>
-                    <p style={{fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem'}}>{cand.desc}</p>
-                  </div>
-                ))}
+                {(() => {
+                  const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+                  return PARTIES.map(cand => {
+                    const partyVotes = votes[cand.id] || 0;
+                    const percentage = totalVotes > 0 ? ((partyVotes / totalVotes) * 100).toFixed(1) : 0;
+                    return (
+                      <div key={cand.id} style={{marginBottom: '1rem'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem'}}>
+                          <span>{cand.name} {userVote === cand.id && <span style={{color: 'var(--success)', marginLeft: '0.5rem'}}>(Your Vote)</span>}</span>
+                          <span style={{fontWeight: 'bold'}}>{percentage}%</span>
+                        </div>
+                        <div style={{height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden'}}>
+                          <div style={{
+                            height: '100%', 
+                            width: `${percentage}%`, 
+                            background: cand.color,
+                            boxShadow: `0 0 10px ${cand.color}80`
+                          }}></div>
+                        </div>
+                        <p style={{fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem'}}>{cand.desc}</p>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
 
               <div className="community-insights" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
@@ -421,16 +469,7 @@ function App() {
                 <button 
                   key={cand.id} 
                   className="hurdle-btn"
-                  onClick={() => {
-                    setUserVote(cand.id);
-                    setShowVotingBooth(false);
-                    setCurrentStep(4);
-                    setMessages(prev => [...prev, { 
-                      id: Date.now(), 
-                      sender: 'bot', 
-                      text: `Your vote for ${cand.name} has been cast! Let's watch the results come in.` 
-                    }]);
-                  }}
+                  onClick={() => handleVote(cand.id)}
                   style={{borderLeft: `4px solid ${cand.color}`}}
                 >
                   <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>

@@ -31,12 +31,28 @@ const DATA = {
   alliances: [
     { name: 'National Democratic Alliance (NDA)', lead: 'BJP', focus: 'Center-right coalition' },
     { name: 'I.N.D.I.A Alliance', lead: 'INC', focus: 'Opposition coalition of 26+ parties' }
-  ]
+  ],
+  votes: {
+    bjp: 380,
+    inc: 280,
+    aap: 120,
+    cpm: 80
+  }
 };
 
 // API Endpoints
 app.get('/api/init', (req, res) => {
   res.json(DATA);
+});
+
+app.post('/api/vote', (req, res) => {
+  const { partyId } = req.body;
+  if (DATA.votes[partyId] !== undefined) {
+    DATA.votes[partyId]++;
+    res.json({ success: true, votes: DATA.votes });
+  } else {
+    res.status(400).json({ success: false, error: 'Invalid party ID' });
+  }
 });
 
 app.post('/api/chat', (req, res) => {
