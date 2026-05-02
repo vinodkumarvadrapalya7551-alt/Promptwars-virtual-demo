@@ -236,6 +236,26 @@ function App() {
                   <div className="step-content">
                     <h3 className="step-title">{step.title}</h3>
                     <p className="step-desc">{step.desc}</p>
+                    
+                    {step.id === 3 && currentStep === 3 && (
+                      <div className="google-maps-feature animate-fade-in" style={{marginTop: '1rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--panel-border)'}}>
+                        <div style={{background: 'rgba(255,255,255,0.05)', padding: '0.5rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                          <MapPin size={12} color="#EA4335" />
+                          <span>Google Maps: Polling Station Locator</span>
+                        </div>
+                        <iframe 
+                          width="100%" 
+                          height="150" 
+                          frameBorder="0" 
+                          style={{border: 0}}
+                          src="https://maps.google.com/maps?q=Polling+Station+Delhi&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                          allowFullScreen
+                        ></iframe>
+                        <div style={{padding: '0.5rem', background: 'rgba(0,0,0,0.2)', fontSize: '0.65rem', color: 'var(--text-muted)'}}>
+                          * Simulated location. In a real app, this would use your GPS to find the nearest official booth.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -315,6 +335,12 @@ function App() {
               <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2rem', textAlign: 'center'}}>
                 Congratulations! You've successfully navigated the election process and cast your vote.
               </p>
+              
+              <div style={{marginTop: '2rem', textAlign: 'center', opacity: 0.6, fontSize: '0.7rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem'}}>
+                <span>Data provided via</span>
+                <img src="https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" height="15" />
+                <span>Civic Information API</span>
+              </div>
             </div>
           )}
         </div>
