@@ -399,41 +399,6 @@ function App() {
                 ))}
               </div>
 
-              <div className="maturity-dashboard" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
-                <h4 style={{fontSize: '0.9rem', marginBottom: '1.2rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-                  <ShieldCheck size={16} className="text-gradient" />
-                  Implementation Maturity
-                </h4>
-                <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '0.8rem'}}>
-                  {[
-                    { label: "Google Services", status: "Advanced", desc: "Cloud Run, Maps, and Civic API integrated." },
-                    { label: "Testing & Validation", status: "Verified", desc: "Core path validation and input sanitization." },
-                    { label: "System Efficiency", status: "Optimized", desc: "Asset optimization and modularized backend." },
-                    { label: "Accessibility", status: "Compliant", desc: "ARIA patterns and structural semantic HTML." },
-                    { label: "Security Implementation", status: "Hardened", desc: "Secure headers and validation protocols active." }
-                  ].map((item, idx) => (
-                    <div key={idx} style={{background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', fontSize: '0.75rem'}}>
-                      <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem'}}>
-                        <span style={{fontWeight: 'bold', color: 'var(--text-main)'}}>{item.label}</span>
-                        <span style={{color: 'var(--success)', fontWeight: 'bold'}}>{item.status}</span>
-                      </div>
-                      <div style={{color: 'var(--text-muted)', fontSize: '0.7rem'}}>{item.desc}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="safety-policy" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid var(--success)'}}>
-                <h4 style={{fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-                  <CheckCircle size={16} /> Responsible Implementation
-                </h4>
-                <ul style={{fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', margin: 0}}>
-                  <li style={{marginBottom: '0.5rem'}}><b>Data Privacy</b>: Voter IDs entered are used only for local simulation and are never stored or transmitted.</li>
-                  <li style={{marginBottom: '0.5rem'}}><b>Neutrality</b>: This assistant is strictly non-partisan and does not recommend any specific political candidate or party.</li>
-                  <li style={{marginBottom: '0.5rem'}}><b>Official Sources</b>: All electoral rules and party information are mirrored from the Election Commission of India (ECI) guidelines.</li>
-                </ul>
-              </div>
-
               <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2rem', textAlign: 'center'}}>
                 Congratulations! You've successfully navigated the election process and cast your vote.
               </p>
