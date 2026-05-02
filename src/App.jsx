@@ -50,23 +50,24 @@ function App() {
   const [voterId, setVoterId] = useState('');
   const [awaitingVoterId, setAwaitingVoterId] = useState(false);
   
-  const PARTIES = [
-    { id: 'bjp', name: 'Bharatiya Janata Party (BJP)', desc: 'Right-wing, conservative, Hindutva-focused.', color: '#FF9933' },
-    { id: 'inc', name: 'Indian National Congress (INC)', desc: 'Center-left, big tent, secularism.', color: '#19AAED' },
-    { id: 'aap', name: 'Aam Aadmi Party (AAP)', desc: 'Centre-left, anti-corruption, social welfare.', color: '#0072B0' },
-    { id: 'cpm', name: 'Communist Party of India (Marxist) (CPM)', desc: 'Left-wing, communist.', color: '#DE0000' }
-  ];
+  const [PARTIES, setParties] = useState([]);
+  const [ALLIANCES, setAlliances] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/init')
+      .then(res => res.json())
+      .then(data => {
+        setParties(data.parties);
+        setAlliances(data.alliances);
+      })
+      .catch(err => console.error("Failed to connect to backend:", err));
+  }, []);
 
   const STATE_PARTIES = [
     { name: 'All India Trinamool Congress (AITC)', base: 'West Bengal' },
     { name: 'Dravida Munnetra Kazhagam (DMK)', base: 'Tamil Nadu' },
     { name: 'Telugu Desam Party (TDP)', base: 'Andhra Pradesh' },
     { name: 'Samajwadi Party (SP)', base: 'Uttar Pradesh' }
-  ];
-
-  const ALLIANCES = [
-    { name: 'National Democratic Alliance (NDA)', lead: 'BJP', focus: 'Center-right coalition' },
-    { name: 'I.N.D.I.A Alliance', lead: 'INC', focus: 'Opposition coalition of 26+ parties' }
   ];
 
   const ELECTORAL_CONTEXT = [
