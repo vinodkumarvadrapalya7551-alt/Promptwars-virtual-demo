@@ -173,6 +173,7 @@ function App() {
   };
 
   const handleHurdleChoice = (option) => {
+    const currentHurdleTitle = activeHurdle?.title;
     setHurdleFeedback({ isCorrect: option.correct, message: option.feedback });
     
     setTimeout(() => {
@@ -188,14 +189,14 @@ function App() {
         
         if (currentStep < 4) {
           setTimeout(() => {
-            if (activeHurdle.title === HURDLES[3].title) {
+            if (currentHurdleTitle === HURDLES[3].title) {
               setActiveHurdle(HURDLES[4]);
               setMessages(prev => [...prev, { 
                 id: Date.now() + 1, 
                 sender: 'bot', 
                 text: "One last check before you enter the booth: identity verification." 
               }]);
-            } else if (activeHurdle.title === HURDLES[4].title) {
+            } else if (currentHurdleTitle === HURDLES[4].title) {
               setShowVotingBooth(true);
             } else {
               setCurrentStep(prev => prev + 1);
