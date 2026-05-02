@@ -47,6 +47,8 @@ function App() {
   const [hurdleFeedback, setHurdleFeedback] = useState(null);
   const [userVote, setUserVote] = useState(null);
   const [showVotingBooth, setShowVotingBooth] = useState(false);
+  const [voterId, setVoterId] = useState('');
+  const [awaitingVoterId, setAwaitingVoterId] = useState(false);
   
   const PARTIES = [
     { id: 'bjp', name: 'Bharatiya Janata Party (BJP)', desc: 'Right-wing, conservative, Hindutva-focused.', color: '#FF9933' },
@@ -95,18 +97,27 @@ function App() {
       let botResponse = "I understand. Let's keep moving forward with the election process.";
       
       const lowerInput = inputText.toLowerCase();
-      if (lowerInput.includes('yes') || lowerInput.includes('ready')) {
-        botResponse = `Great! Let's tackle Step ${currentStep}: ${ELECTION_STEPS[currentStep-1].title}. ${ELECTION_STEPS[currentStep-1].desc}`;
-        
-        // Trigger hurdle randomly or specifically
-        if (HURDLES[currentStep]) {
-          setTimeout(() => {
-            setActiveHurdle(HURDLES[currentStep]);
-          }, 2000);
-        } else if (currentStep < 4) {
-             botResponse += " Ready for the next step?";
+      if (awaitingVoterId) {
+        setVoterId(inputText);
+        setAwaitingVoterId(false);
+        botResponse = `Voter ID "${inputText}" has been noted. Checking our systems... It seems there's a slight issue.`;
+        setTimeout(() => {
+          setActiveHurdle(HURDLES[1]);
+        }, 1500);
+      } else if (lowerInput.includes('yes') || lowerInput.includes('ready')) {
+        if (currentStep === 1) {
+          setAwaitingVoterId(true);
+          botResponse = "Excellent! To begin Step 1: Voter Registration, please enter your Voter ID number.";
         } else {
-             botResponse += " Congratulations! You've completed the election journey!";
+          botResponse = `Great! Let's tackle Step ${currentStep}: ${ELECTION_STEPS[currentStep-1].title}. ${ELECTION_STEPS[currentStep-1].desc}`;
+          
+          if (HURDLES[currentStep]) {
+            setTimeout(() => {
+              setActiveHurdle(HURDLES[currentStep]);
+            }, 2000);
+          } else if (currentStep < 4) {
+            botResponse += " Ready for the next step?";
+          }
         }
       } else if (lowerInput.includes('next')) {
         if (currentStep < 4) {
