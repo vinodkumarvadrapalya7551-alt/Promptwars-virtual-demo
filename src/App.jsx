@@ -137,8 +137,12 @@ function App() {
         }
       } else if (lowerInput.includes('next')) {
         if (currentStep < 4) {
-          setCurrentStep(prev => prev + 1);
-          botResponse = `Moving to Step ${currentStep + 1}. Are you ready?`;
+          if (currentStep === 3 && !userVote) {
+            botResponse = "You need to cast your vote in the polling booth before moving to the results! It's your right and responsibility.";
+          } else {
+            setCurrentStep(prev => prev + 1);
+            botResponse = `Moving to Step ${currentStep + 1}. Are you ready?`;
+          }
         } else {
           botResponse = "You have completed all the steps!";
         }
@@ -165,15 +169,33 @@ function App() {
           setMessages(prev => [...prev, { 
             id: Date.now(), 
             sender: 'bot', 
-            text: `Your vote for ${party?.name || 'your chosen party'} has been cast! Let's watch the results come in.` 
+            text: `🎉 CONGRATULATIONS! Your vote for ${party?.name || 'your chosen party'} has been successfully cast and recorded. This is the foundation of democracy!` 
           }]);
         }
       })
       .catch(err => console.error("Voting failed:", err));
   };
 
+  const handleStepClick = (stepId) => {
+    // Allow navigating back anytime, or forward if requirements are met
+    if (stepId < currentStep) {
+      setCurrentStep(stepId);
+    } else if (stepId === currentStep + 1) {
+      // Basic validation for moving forward
+      if (currentStep === 1 && !voterId) {
+        setMessages(prev => [...prev, { id: Date.now(), sender: 'bot', text: "Please enter your Voter ID to complete registration before moving forward." }]);
+        setAwaitingVoterId(true);
+      } else if (currentStep === 3 && !userVote) {
+        setMessages(prev => [...prev, { id: Date.now(), sender: 'bot', text: "Don't forget to cast your vote in the polling booth!" }]);
+        setShowVotingBooth(true);
+      } else {
+        setCurrentStep(stepId);
+      }
+    }
+  };
+
   const handleHurdleChoice = (option) => {
-    const currentHurdleTitle = activeHurdle?.title;
+    const currentHurdle = activeHurdle;
     setHurdleFeedback({ isCorrect: option.correct, message: option.feedback });
     
     setTimeout(() => {
@@ -189,14 +211,14 @@ function App() {
         
         if (currentStep < 4) {
           setTimeout(() => {
-            if (currentHurdleTitle === HURDLES[3].title) {
+            if (currentHurdle.title === HURDLES[3].title) {
               setActiveHurdle(HURDLES[4]);
               setMessages(prev => [...prev, { 
                 id: Date.now() + 1, 
                 sender: 'bot', 
                 text: "One last check before you enter the booth: identity verification." 
               }]);
-            } else if (currentHurdleTitle === HURDLES[4].title) {
+            } else if (currentHurdle.title === HURDLES[4].title) {
               setShowVotingBooth(true);
             } else {
               setCurrentStep(prev => prev + 1);
@@ -259,6 +281,40 @@ function App() {
             <div ref={messagesEndRef} />
           </div>
 
+          <div className="quick-replies" style={{padding: '0 1.2rem 1.2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
+            {currentStep < 4 && !activeHurdle && !showVotingBooth && (
+              <button 
+                className="quick-reply-btn" 
+                onClick={() => {
+                  setInputText('ready');
+                  handleSend();
+                }}
+              >
+                I'm Ready
+              </button>
+            )}
+            {currentStep === 3 && !userVote && !activeHurdle && !showVotingBooth && (
+              <button 
+                className="quick-reply-btn" 
+                onClick={() => setShowVotingBooth(true)}
+                style={{borderColor: 'var(--success)', color: 'var(--success)'}}
+              >
+                Go to Booth
+              </button>
+            )}
+            {((currentStep < 3) || (currentStep === 3 && userVote)) && !activeHurdle && (
+              <button 
+                className="quick-reply-btn" 
+                onClick={() => {
+                  setInputText('next');
+                  handleSend();
+                }}
+              >
+                Next Step →
+              </button>
+            )}
+          </div>
+
           <div className="chat-input-area">
             <input 
               type="text" 
@@ -286,11 +342,13 @@ function App() {
               
               return (
                 <div 
-                className={`timeline-step ${step.id === currentStep ? 'active animate-pulse' : ''} ${step.id < currentStep ? 'completed' : ''}`} 
-                key={step.id}
-                role="listitem"
-                aria-current={step.id === currentStep ? 'step' : undefined}
-              >
+                  className={`timeline-step ${step.id === currentStep ? 'active animate-pulse' : ''} ${step.id < currentStep ? 'completed' : ''}`} 
+                  key={step.id}
+                  role="listitem"
+                  aria-current={step.id === currentStep ? 'step' : undefined}
+                  onClick={() => handleStepClick(step.id)}
+                  style={{ cursor: 'pointer' }}
+                >
                 <div className="step-indicator" aria-hidden="true">
                   {step.id < currentStep ? <CheckCircle size={16} /> : step.id}
                 </div>
@@ -344,29 +402,62 @@ function App() {
                 </h4>
                 {(() => {
                   const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
-                  return PARTIES.map(cand => {
-                    const partyVotes = votes[cand.id] || 0;
-                    const percentage = totalVotes > 0 ? ((partyVotes / totalVotes) * 100).toFixed(1) : 0;
-                    return (
-                      <div key={cand.id} style={{marginBottom: '1rem'}}>
-                        <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem'}}>
-                          <span>{cand.name} {userVote === cand.id && <span style={{color: 'var(--success)', marginLeft: '0.5rem'}}>(Your Vote)</span>}</span>
-                          <span style={{fontWeight: 'bold'}}>{percentage}%</span>
-                        </div>
-                        <div style={{height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden'}}>
-                          <div style={{
-                            height: '100%', 
-                            width: `${percentage}%`, 
-                            background: cand.color,
-                            boxShadow: `0 0 10px ${cand.color}80`
-                          }}></div>
-                        </div>
-                        <p style={{fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem'}}>{cand.desc}</p>
+                  return (
+                    <>
+                      <div style={{marginBottom: '1.5rem', padding: '1rem', background: 'rgba(79, 70, 229, 0.1)', borderRadius: '8px', border: '1px solid var(--primary)', textAlign: 'center'}}>
+                        <div style={{fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Total Verified Votes</div>
+                        <div style={{fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)'}}>{totalVotes.toLocaleString()}</div>
                       </div>
-                    );
-                  });
+                      {PARTIES.map(cand => {
+                        const partyVotes = votes[cand.id] || 0;
+                        const percentage = totalVotes > 0 ? ((partyVotes / totalVotes) * 100).toFixed(1) : 0;
+                        return (
+                          <div key={cand.id} style={{marginBottom: '1rem'}}>
+                            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem'}}>
+                              <span>{cand.name} {userVote === cand.id && <span style={{color: 'var(--success)', marginLeft: '0.5rem'}}>(Your Vote)</span>}</span>
+                              <span style={{fontWeight: 'bold'}}>{percentage}%</span>
+                            </div>
+                            <div style={{height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden'}}>
+                              <div style={{
+                                height: '100%', 
+                                width: `${percentage}%`, 
+                                background: cand.color,
+                                boxShadow: `0 0 10px ${cand.color}80`
+                              }}></div>
+                            </div>
+                            <p style={{fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem'}}>{cand.desc}</p>
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
                 })()}
               </div>
+
+              {userVote && (
+                <div className="digital-slip animate-fade-in" style={{marginTop: '2rem', padding: '1.5rem', background: 'white', borderRadius: '12px', color: '#1a1a1a', position: 'relative', overflow: 'hidden'}}>
+                  <div style={{position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'rgba(0,0,0,0.05)', borderRadius: '50%'}}></div>
+                  <div style={{border: '2px dashed #ccc', padding: '1rem', borderRadius: '8px'}}>
+                    <div style={{textAlign: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem'}}>
+                      <h4 style={{fontSize: '0.9rem', color: '#333'}}>VOTER VERIFICATION SLIP</h4>
+                      <p style={{fontSize: '0.6rem', color: '#666'}}>General Elections 2026</p>
+                    </div>
+                    <div style={{fontSize: '0.75rem', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '0.5rem'}}>
+                      <span style={{color: '#888'}}>Voter ID:</span> <span style={{fontWeight: 'bold'}}>{voterId || 'N/A'}</span>
+                      <span style={{color: '#888'}}>Station:</span> <span style={{fontWeight: 'bold'}}>Station #42, New Delhi</span>
+                      <span style={{color: '#888'}}>Vote Cast:</span> <span style={{fontWeight: 'bold', color: 'var(--primary)'}}>SUCCESSFUL</span>
+                      <span style={{color: '#888'}}>Timestamp:</span> <span style={{fontWeight: 'bold'}}>{new Date().toLocaleString()}</span>
+                    </div>
+                    <div style={{marginTop: '1rem', textAlign: 'center'}}>
+                      <CheckCircle size={24} color="#10B981" style={{margin: '0 auto'}} />
+                      <p style={{fontSize: '0.6rem', color: '#10B981', marginTop: '0.3rem', fontWeight: 'bold'}}>VERIFIED BY ECI</p>
+                    </div>
+                  </div>
+                  <div style={{fontSize: '0.55rem', textAlign: 'center', marginTop: '0.8rem', color: '#999', fontStyle: 'italic'}}>
+                    * This is a simulated educational slip and holds no legal value.
+                  </div>
+                </div>
+              )}
 
               <div className="community-insights" style={{marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--panel-border)'}}>
                 <h4 style={{fontSize: '0.9rem', marginBottom: '1.2rem', color: 'var(--text-main)'}}>Major State Parties</h4>
@@ -416,7 +507,7 @@ function App() {
 
       <footer style={{textAlign: 'center', padding: '2rem', marginTop: 'auto', borderTop: '1px solid var(--panel-border)', opacity: 0.7}}>
         <p style={{fontSize: '0.7rem', color: 'var(--text-muted)'}}>
-          © 2026 DemocraGuide | Built with Responsible AI Principles | For Educational Purposes Only
+          © 2026 DemocraGuide | For Educational Purposes Only
         </p>
       </footer>
 
